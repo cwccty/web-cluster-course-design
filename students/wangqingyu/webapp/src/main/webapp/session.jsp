@@ -1,17 +1,28 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.net.InetAddress" %>
 <%@ page import="java.util.UUID" %>
+<%@ page import="redis.clients.jedis.Jedis" %>
 <%
-    String redisStatus = "OK";
-    String sharedId = (String)application.getAttribute("sharedId");
-    if (sharedId == null) {
-        sharedId = UUID.randomUUID().toString();
-        application.setAttribute("sharedId", sharedId);
+    String redisHost = System.getenv("REDIS_HOST");
+    if (redisHost == null || redisHost.length() == 0) redisHost = "wangqingyu-redis";
+    String redisStatus = "FAIL";
+    String sharedId = "";
+    Long count = 0L;
+    String keyPrefix = "wangqingyu:session:";
+    try (Jedis jedis = new Jedis(redisHost, 6379)) {
+        String existing = jedis.get(keyPrefix + "sharedId");
+        if (existing == null) {
+            existing = UUID.randomUUID().toString();
+            jedis.set(keyPrefix + "sharedId", existing);
+        }
+        sharedId = existing;
+        count = jedis.incr(keyPrefix + "count");
+        redisStatus = "OK";
+    } catch (Exception ex) {
+        redisStatus = "FAIL: " + ex.getClass().getSimpleName();
+        sharedId = "Redis connection error";
+        count = -1L;
     }
-    Integer count = (Integer)application.getAttribute("sharedCount");
-    if (count == null) count = 0;
-    count = count + 1;
-    application.setAttribute("sharedCount", count);
 
     String hostName = InetAddress.getLocalHost().getHostName();
     String hostAddress = InetAddress.getLocalHost().getHostAddress();
@@ -33,6 +44,7 @@
       <tr><th>项目</th><th>结果</th></tr>
       <tr><td>GitHub目录</td><td>students/wangqingyu</td></tr>
       <tr><td>JSP SessionID</td><td><%= session.getId() %></td></tr>
+      <tr><td>Redis主机</td><td><%= redisHost %></td></tr>
       <tr><td>Redis共享ID</td><td><%= sharedId %></td></tr>
       <tr><td>共享访问次数</td><td><%= count %></td></tr>
       <tr><td>当前Tomcat节点</td><td><%= nodeName %></td></tr>
