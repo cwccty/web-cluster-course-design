@@ -1,0 +1,37 @@
+pipeline {
+  agent any
+  stages {
+    stage('Checkout from GitHub') {
+      steps {
+        echo 'GitHub repository: cwccty/web-cluster-course-design'
+      }
+    }
+    stage('Build JSP WAR') {
+      steps {
+        dir('students/wangqingyu/webapp') {
+          sh 'mvn -q clean package -DskipTests'
+        }
+      }
+    }
+    stage('Deploy to Tomcat cluster') {
+      steps {
+        sh '''
+          set -eux
+          rm -rf /course-design-five/wangqingyu/deploy/tomcat01/ROOT /course-design-five/wangqingyu/deploy/tomcat01/ROOT.war
+          rm -rf /course-design-five/wangqingyu/deploy/tomcat02/ROOT /course-design-five/wangqingyu/deploy/tomcat02/ROOT.war
+          cp students/wangqingyu/webapp/target/ROOT.war /course-design-five/wangqingyu/deploy/tomcat01/ROOT.war
+          cp students/wangqingyu/webapp/target/ROOT.war /course-design-five/wangqingyu/deploy/tomcat02/ROOT.war
+          ls -l /course-design-five/wangqingyu/deploy/tomcat01 /course-design-five/wangqingyu/deploy/tomcat02
+        '''
+      }
+    }
+    stage('Verify') {
+      steps {
+        echo 'Student: 网络一班:王青宇'
+        echo 'Nginx: http://154.64.231.137:18380/session.jsp'
+        echo 'Tomcat1: http://154.64.231.137:18391/session.jsp'
+        echo 'Tomcat2: http://154.64.231.137:18392/session.jsp'
+      }
+    }
+  }
+}

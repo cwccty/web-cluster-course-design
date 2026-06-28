@@ -1,0 +1,20 @@
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", Arial, sans-serif;
+  background: #f3f7fb;
+  color: #1f2937;
+}
+.panel {
+  width: min(820px, calc(100vw - 48px));
+  margin: 48px auto;
+  padding: 28px 32px;
+  background: #ffffff;
+  border: 1px solid #d7dee8;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+h1 { margin-top: 0; color: #1e3a8a; }
+.student { font-size: 20px; font-weight: 700; color: #b91c1c; }
+table { border-collapse: collapse; width: 100%; margin-top: 18px; }
+th, td { border: 1px solid #cbd5e1; padding: 10px 12px; text-align: left; }
+th { background: #e8f0fb; }
+.note { color: #475569; margin-top: 18px; }
